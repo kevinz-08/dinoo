@@ -3,32 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>olaa</title>
     <style>
 
 * {
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
 }
 
 body{
-    height: 100vh;
+    min-height: 100vh;
     background: #ffe6f7;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: manipulation;
 }
 
 .contenedor {
-    width: 920px;
+    width: 100%;
+    max-width: 920px;
     height: 280px;
     margin: 0 auto;
     
     position: relative;
 
-    background: linear-gradient(#b7d6c7, transparent) #ffe2d1;/*linear-gradient(#90ebff, white);*/
+    background: linear-gradient(#b7d6c7, transparent) #ffe2d1;
     transition: background-color 1s linear;
     overflow: hidden;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 920px) {
+    .contenedor {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contenedor {
+        height: 180px;
+    }
 }
 
 .mediodia {
@@ -55,7 +74,17 @@ body{
     background: url(img/kitty.png) repeat-x 0px 0px;
     background-size: 336px 84px;
     background-position-x: 0px;
+}
 
+/* Hacer el dino más pequeño en móviles */
+@media (max-width: 480px) {
+    .dino {
+        width: 60px;
+        height: 60px;
+        background-size: 240px 60px;
+        left: 30px;
+        bottom: 16px;
+    }
 }
 
 .dino-corriendo {
@@ -63,6 +92,12 @@ body{
 }
 .dino-estrellado {
     background-position-x: -252px;
+}
+
+@media (max-width: 480px) {
+    .dino-estrellado {
+        background-position-x: -180px;
+    }
 }
 
 .suelo {
@@ -75,7 +110,13 @@ body{
 
     background: url(img/suelo.png) repeat-x 0px 0px;
     background-size: 50% 42px;
+}
 
+@media (max-width: 480px) {
+    .suelo {
+        height: 30px;
+        background-size: 50% 30px;
+    }
 }
 
 .cactus{
@@ -88,12 +129,29 @@ body{
     z-index: 1;
 
     background: url(img/cactus1.png) no-repeat;
+    background-size: contain;
 }
+
+@media (max-width: 480px) {
+    .cactus{
+        width: 35px;
+        height: 70px;
+        bottom: 12px;
+    }
+}
+
 .cactus2{
     width: 98px;
     height: 66px;
-
     background: url(img/cactus2.png) no-repeat;
+    background-size: contain;
+}
+
+@media (max-width: 480px) {
+    .cactus2{
+        width: 70px;
+        height: 50px;
+    }
 }
 
 .nube{
@@ -123,18 +181,50 @@ body{
     text-align: right;
 }
 
+@media (max-width: 480px) {
+    .score{
+        font-size: 24px;
+        top: 8px;
+        right: 10px;
+    }
+}
+
 .game-over{
     display: none;
-
     position: absolute;
     width: 100%;
-
+    top: 50%;
+    transform: translateY(-50%);
 
     text-align: center;
     color: #b165b4;
     font-size: 30px;
     font-family: Verdana;
     font-weight: 700;
+}
+
+@media (max-width: 480px) {
+    .game-over{
+        font-size: 24px;
+    }
+}
+
+.instrucciones {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    color: #b165b4;
+    font-family: Verdana;
+    font-size: 16px;
+    z-index: 5;
+}
+
+@media (max-width: 480px) {
+    .instrucciones {
+        font-size: 14px;
+        bottom: 5px;
+    }
 }
 
 @keyframes animarDino{
@@ -146,6 +236,16 @@ body{
     }
 }
 
+@media (max-width: 480px) {
+    @keyframes animarDino{
+        from{
+            background-position-x: -60px;
+        }
+        to{
+            background-position-x: -180px;
+        }
+    }
+}
 
     </style>
 </head>
@@ -159,10 +259,11 @@ body{
 
         <div class="score">0</div>
 
-    </div>
+        <div class="game-over">GAME OVER<br><small>Toca para reiniciar</small></div>
 
-    <div class="game-over">GAME OVER</div>
-    
+        <div class="instrucciones">Toca la pantalla para saltar</div>
+
+    </div>
 
 <script>
 
@@ -227,6 +328,16 @@ var dino;
 var textoScore;
 var suelo;
 var gameOver;
+var instrucciones;
+var juegoIniciado = false;
+
+// Ajustar valores para móvil
+if(window.innerWidth <= 480) {
+    sueloY = 16;
+    dinoPosY = sueloY;
+    obstaculoPosY = 12;
+    dinoPosX = 30;
+}
 
 function Start() {
     gameOver = document.querySelector(".game-over");
@@ -234,8 +345,21 @@ function Start() {
     contenedor = document.querySelector(".contenedor");
     textoScore = document.querySelector(".score");
     dino = document.querySelector(".dino");
+    instrucciones = document.querySelector(".instrucciones");
+    
     document.addEventListener("keydown", HandleKeyDown);
     document.addEventListener("touchstart", HandleTouchStart);
+    document.addEventListener("click", HandleClick);
+    
+    // Prevenir zoom en doble tap
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 }
 
 function Update() {
@@ -258,8 +382,23 @@ function HandleKeyDown(ev){
     }
 }
 
-function HandleTouchStart() {
-    Saltar();
+function HandleTouchStart(ev) {
+    ev.preventDefault();
+    if(parado) {
+        Reiniciar();
+    } else {
+        Saltar();
+    }
+    if(!juegoIniciado) {
+        juegoIniciado = true;
+        if(instrucciones) instrucciones.style.display = 'none';
+    }
+}
+
+function HandleClick(ev) {
+    if(parado) {
+        Reiniciar();
+    }
 }
 
 function Saltar(){
@@ -273,7 +412,6 @@ function Saltar(){
 function MoverDinosaurio() {
     dinoPosY += velY * deltaTime;
     if(dinoPosY < sueloY){
-        
         TocarSuelo();
     }
     dino.style.bottom = dinoPosY+"px";
@@ -387,11 +525,43 @@ function GameOver() {
     gameOver.style.display = "block";
 }
 
+function Reiniciar() {
+    parado = false;
+    score = 0;
+    gameVel = 1;
+    
+    contenedor.classList.remove("mediodia", "tarde", "noche");
+    
+    gameOver.style.display = "none";
+    dino.classList.remove("dino-estrellado");
+    dino.classList.add("dino-corriendo");
+    
+    textoScore.innerText = score;
+    
+    // Limpiar obstáculos
+    obstaculos.forEach(obstaculo => {
+        obstaculo.parentNode.removeChild(obstaculo);
+    });
+    obstaculos = [];
+    
+    // Limpiar nubes
+    nubes.forEach(nube => {
+        nube.parentNode.removeChild(nube);
+    });
+    nubes = [];
+    
+    tiempoHastaObstaculo = 2;
+    tiempoHastaNube = 0.5;
+    
+    dinoPosY = sueloY;
+    velY = 0;
+    saltando = false;
+}
+
 function DetectarColision() {
     for (var i = 0; i < obstaculos.length; i++) {
         if(obstaculos[i].posX > dinoPosX + dino.clientWidth) {
-            //EVADE
-            break; //al estar en orden, no puede chocar con más
+            break;
         }else{
             if(IsCollision(dino, obstaculos[i], 10, 30, 15, 20)) {
                 GameOver();
@@ -411,7 +581,6 @@ function IsCollision(a, b, paddingTop, paddingRight, paddingBottom, paddingLeft)
         (aRect.left + paddingLeft > (bRect.left + bRect.width))
     );
 }
-
 
 </script>
 </body>
