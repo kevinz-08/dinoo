@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>olaa</title>
+    <title>Kitty Run</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
 
 * {
@@ -13,15 +16,25 @@
     box-sizing: border-box;
 }
 
+:root {
+    --rosa: #ff8fc7;
+    --rosa-fuerte: #e8558f;
+    --rosa-suave: #ffd6ec;
+    --celeste: #8fd7ff;
+    --dorado: #ffc93c;
+    --texto: #6b3b63;
+}
+
 body{
     min-height: 100vh;
-    background: #ffe6f7;
+    background: radial-gradient(circle at 50% 0%, #fff0f9, #ffd6ec 60%, #ffc2e6);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     touch-action: manipulation;
+    font-family: 'Baloo 2', 'Verdana', sans-serif;
 }
 
 .contenedor {
@@ -29,12 +42,25 @@ body{
     max-width: 920px;
     height: 280px;
     margin: 0 auto;
-    
-    position: relative;
 
-    background: linear-gradient(#b7d6c7, transparent) #ffe2d1;
-    transition: background-color 1s linear;
+    position: relative;
+    border-radius: 18px;
+    box-shadow: 0 12px 34px rgba(180, 60, 130, 0.35), 0 0 0 4px #fff;
+
+    background-image: url(img/sky.jpg);
+    background-size: cover;
+    background-position: center bottom;
     overflow: hidden;
+}
+
+.contenedor::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: transparent;
+    transition: background 1.2s ease, opacity 1.2s ease;
+    pointer-events: none;
 }
 
 /* Ajustes para pantallas pequeñas */
@@ -50,16 +76,16 @@ body{
     }
 }
 
-.mediodia {
-    background-color: #ffdcf3;
+.mediodia::before {
+    background: rgba(255, 214, 130, 0.25);
 }
 
-.tarde {
-    background-color: #ffadad;
+.tarde::before {
+    background: rgba(255, 120, 110, 0.35);
 }
 
-.noche {
-    background-color: #aca8c7;
+.noche::before {
+    background: rgba(30, 20, 70, 0.55);
 }
 
 .dino {
@@ -69,11 +95,24 @@ body{
     position: absolute;
     bottom: 22px;
     left: 42px;
-    z-index: 2;
+    z-index: 4;
 
     background: url(img/kitty.png) repeat-x 0px 0px;
     background-size: 336px 84px;
     background-position-x: 0px;
+}
+
+.sombra {
+    width: 60px;
+    height: 12px;
+
+    position: absolute;
+    bottom: 18px;
+    left: 54px;
+    z-index: 3;
+
+    background: radial-gradient(ellipse at center, rgba(107, 59, 99, 0.35) 0%, rgba(107, 59, 99, 0) 70%);
+    transition: width 0.1s linear, opacity 0.1s linear;
 }
 
 /* Hacer el dino más pequeño en móviles */
@@ -84,6 +123,12 @@ body{
         background-size: 240px 60px;
         left: 30px;
         bottom: 16px;
+    }
+
+    .sombra {
+        width: 42px;
+        left: 39px;
+        bottom: 12px;
     }
 }
 
@@ -107,6 +152,7 @@ body{
     position: absolute;
     bottom: 0;
     left: 0;
+    z-index: 2;
 
     background: url(img/suelo.png) repeat-x 0px 0px;
     background-size: 50% 42px;
@@ -126,7 +172,7 @@ body{
     position: absolute;
     bottom: 16px;
     left: 600px;
-    z-index: 1;
+    z-index: 3;
 
     background: url(img/cactus1.png) no-repeat;
     background-size: contain;
@@ -159,54 +205,182 @@ body{
     height: 26px;
 
     position: absolute;
-    z-index: 0;
+    z-index: 1;
 
     background: url(img/nube.png) no-repeat;
     background-size: 92px 26px;
+    opacity: 0.9;
+}
+
+.hud {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    z-index: 10;
+
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+
+    font-family: 'Baloo 2', sans-serif;
+    color: var(--texto);
+    text-shadow: 0 2px 0 rgba(255,255,255,0.6);
+}
+
+.hud .hi {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--rosa-fuerte);
+    opacity: 0.85;
+}
+
+.hud .hi small {
+    font-size: 11px;
+    letter-spacing: 1px;
 }
 
 .score{
-    width: 100px;
-    height: 30px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
 
-    position: absolute;
-    top: 5px;
-    right: 15px;
-    z-index: 10;
+.score.pop {
+    animation: scorePop 0.4s ease;
+}
 
-    color: #d48871;
-    font-family: Verdana;
-    font-size: 30px;
-    font-weight: bold;
-    text-align: right;
+@keyframes scorePop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.5); color: var(--dorado); }
+    100% { transform: scale(1); }
 }
 
 @media (max-width: 480px) {
-    .score{
-        font-size: 24px;
+    .hud {
         top: 8px;
         right: 10px;
+        gap: 8px;
+    }
+    .score{
+        font-size: 20px;
+    }
+    .hud .hi {
+        font-size: 12px;
     }
 }
 
-.game-over{
+.overlay {
     display: none;
     position: absolute;
-    width: 100%;
-    top: 50%;
-    transform: translateY(-50%);
+    inset: 0;
+    z-index: 20;
 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     text-align: center;
-    color: #b165b4;
-    font-size: 30px;
-    font-family: Verdana;
+    padding: 20px;
+
+    background: rgba(255, 245, 251, 0.82);
+    backdrop-filter: blur(2px);
+}
+
+.overlay.visible {
+    display: flex;
+}
+
+.overlay-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 32px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 26px rgba(232, 85, 143, 0.25);
+    border: 3px solid var(--rosa-suave);
+}
+
+.overlay-emoji {
+    font-size: 42px;
+    line-height: 1;
+}
+
+.overlay-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--rosa-fuerte);
+    letter-spacing: 1px;
+}
+
+.overlay-sub {
+    font-size: 15px;
+    color: var(--texto);
+    opacity: 0.85;
+}
+
+.overlay-scores {
+    display: flex;
+    gap: 22px;
+    margin: 4px 0;
+}
+
+.overlay-scores div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.overlay-scores span.label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--texto);
+    opacity: 0.6;
+}
+
+.overlay-scores span.value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--texto);
+}
+
+.overlay-btn {
+    margin-top: 6px;
+    padding: 10px 26px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--rosa), var(--rosa-fuerte));
+    color: #fff;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 16px;
     font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(232, 85, 143, 0.4);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.overlay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(232, 85, 143, 0.5);
+}
+
+.overlay-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(232, 85, 143, 0.4);
 }
 
 @media (max-width: 480px) {
-    .game-over{
-        font-size: 24px;
-    }
+    .overlay-card { padding: 16px 22px; }
+    .overlay-emoji { font-size: 32px; }
+    .overlay-title { font-size: 20px; }
+    .overlay-sub { font-size: 13px; }
+    .overlay-scores span.value { font-size: 18px; }
+    .overlay-btn { font-size: 14px; padding: 8px 20px; }
 }
 
 .instrucciones {
@@ -214,15 +388,23 @@ body{
     bottom: 10px;
     width: 100%;
     text-align: center;
-    color: #b165b4;
-    font-family: Verdana;
-    font-size: 16px;
+    color: var(--texto);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
     z-index: 5;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+    transition: opacity 0.4s ease;
+}
+
+.instrucciones.oculta {
+    opacity: 0;
+    pointer-events: none;
 }
 
 @media (max-width: 480px) {
     .instrucciones {
-        font-size: 14px;
+        font-size: 13px;
         bottom: 5px;
     }
 }
@@ -254,14 +436,37 @@ body{
     <div class="contenedor">
 
         <div class="suelo"></div>
-        
-        <div class="dino dino-corriendo"></div>
 
-        <div class="score">0</div>
+        <div class="sombra"></div>
 
-        <div class="game-over">GAME OVER<br><small>Toca para reiniciar</small></div>
+        <div class="dino"></div>
 
-        <div class="instrucciones">Toca la pantalla para saltar</div>
+        <div class="hud">
+            <div class="hi"><small>HI</small> <span class="high-score">00</span></div>
+            <div class="score">00</div>
+        </div>
+
+        <div class="overlay start-screen visible">
+            <div class="overlay-card">
+                <div class="overlay-title">Tycoon Run</div>
+                <div class="overlay-sub">No recuerdo que era un tycoon pero a ti te gusta entonces jaj</div>
+                <button type="button" class="overlay-btn start-btn">▶ Jugar</button>
+            </div>
+        </div>
+
+        <div class="overlay game-over">
+            <div class="overlay-card">
+                <div class="overlay-emoji">💥</div>
+                <div class="overlay-title">GAME OVER</div>
+                <div class="overlay-scores">
+                    <div><span class="label">SCORE</span><span class="value final-score">0</span></div>
+                    <div><span class="label">HI</span><span class="value final-high-score">0</span></div>
+                </div>
+                <button type="button" class="overlay-btn restart-btn">↻ Reintentar</button>
+            </div>
+        </div>
+
+        <div class="instrucciones oculta">▲ Toca la pantalla o presiona ESPACIO para saltar</div>
 
     </div>
 
@@ -304,6 +509,9 @@ var dinoPosY = sueloY;
 var sueloX = 0;
 var velEscenario = 1280/3;
 var gameVel = 1;
+var gameVelObjetivo = 1;
+var velRampaMax = 30;
+var velLerp = 1.4;
 var score = 0;
 
 var parado = false;
@@ -325,11 +533,19 @@ var velNube = 0.5;
 
 var contenedor;
 var dino;
+var sombra;
 var textoScore;
+var textoHighScore;
+var textoFinalScore;
+var textoFinalHighScore;
 var suelo;
 var gameOver;
+var startScreen;
 var instrucciones;
 var juegoIniciado = false;
+var highScore = 0;
+
+var HIGH_SCORE_KEY = "kittyRunHighScore";
 
 // Ajustar valores para móvil
 if(window.innerWidth <= 480) {
@@ -341,16 +557,30 @@ if(window.innerWidth <= 480) {
 
 function Start() {
     gameOver = document.querySelector(".game-over");
+    startScreen = document.querySelector(".start-screen");
     suelo = document.querySelector(".suelo");
     contenedor = document.querySelector(".contenedor");
     textoScore = document.querySelector(".score");
+    textoHighScore = document.querySelector(".high-score");
+    textoFinalScore = document.querySelector(".final-score");
+    textoFinalHighScore = document.querySelector(".final-high-score");
     dino = document.querySelector(".dino");
+    sombra = document.querySelector(".sombra");
     instrucciones = document.querySelector(".instrucciones");
-    
+
+    highScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY), 10) || 0;
+    ActualizarTextoHighScore();
+
     document.addEventListener("keydown", HandleKeyDown);
     document.addEventListener("touchstart", HandleTouchStart);
     document.addEventListener("click", HandleClick);
-    
+
+    document.querySelector(".start-btn").addEventListener("click", IniciarJuego);
+    document.querySelector(".restart-btn").addEventListener("click", function(ev){
+        ev.stopPropagation();
+        Reiniciar();
+    });
+
     // Prevenir zoom en doble tap
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function (event) {
@@ -363,8 +593,9 @@ function Start() {
 }
 
 function Update() {
-    if(parado) return;
-    
+    if(parado || !juegoIniciado) return;
+
+    ActualizarVelocidadJuego();
     MoverDinosaurio();
     MoverSuelo();
     DecidirCrearObstaculos();
@@ -376,27 +607,55 @@ function Update() {
     velY -= gravedad * deltaTime;
 }
 
+function ActualizarVelocidadJuego() {
+    gameVel += (gameVelObjetivo - gameVel) * Math.min(1, deltaTime * velLerp);
+    suelo.style.animationDuration = (3/gameVel)+"s";
+}
+
+function ActualizarTextoHighScore() {
+    var valor = String(highScore).padStart(2, "0");
+    if(textoHighScore) textoHighScore.innerText = valor;
+    if(textoFinalHighScore) textoFinalHighScore.innerText = highScore;
+}
+
+function IniciarJuego() {
+    if(juegoIniciado) return;
+    juegoIniciado = true;
+    if(startScreen) startScreen.classList.remove("visible");
+    if(instrucciones) instrucciones.classList.remove("oculta");
+    dino.classList.add("dino-corriendo");
+}
+
 function HandleKeyDown(ev){
     if(ev.keyCode == 32){
-        Saltar();
+        ev.preventDefault();
+        if(!juegoIniciado) {
+            IniciarJuego();
+        } else if(parado) {
+            Reiniciar();
+        } else {
+            Saltar();
+        }
     }
 }
 
 function HandleTouchStart(ev) {
+    if(ev.target.closest(".overlay-btn")) return;
     ev.preventDefault();
-    if(parado) {
+    if(!juegoIniciado) {
+        IniciarJuego();
+    } else if(parado) {
         Reiniciar();
     } else {
         Saltar();
     }
-    if(!juegoIniciado) {
-        juegoIniciado = true;
-        if(instrucciones) instrucciones.style.display = 'none';
-    }
 }
 
 function HandleClick(ev) {
-    if(parado) {
+    if(ev.target.closest(".overlay-btn")) return;
+    if(!juegoIniciado) {
+        IniciarJuego();
+    } else if(parado) {
         Reiniciar();
     }
 }
@@ -406,6 +665,7 @@ function Saltar(){
         saltando = true;
         velY = impulso;
         dino.classList.remove("dino-corriendo");
+        if(instrucciones) instrucciones.classList.add("oculta");
     }
 }
 
@@ -415,6 +675,15 @@ function MoverDinosaurio() {
         TocarSuelo();
     }
     dino.style.bottom = dinoPosY+"px";
+    ActualizarSombra();
+}
+
+function ActualizarSombra() {
+    if(!sombra) return;
+    var altura = dinoPosY - sueloY;
+    var factor = Math.max(0.35, 1 - altura / 160);
+    sombra.style.transform = "scale(" + factor.toFixed(2) + ")";
+    sombra.style.opacity = factor.toFixed(2);
 }
 
 function TocarSuelo() {
@@ -506,38 +775,49 @@ function MoverNubes() {
 
 function GanarPuntos() {
     score++;
-    textoScore.innerText = score;
+    textoScore.innerText = String(score).padStart(2, "0");
+    textoScore.classList.remove("pop");
+    void textoScore.offsetWidth;
+    textoScore.classList.add("pop");
+
+    if(score > highScore){
+        highScore = score;
+        localStorage.setItem(HIGH_SCORE_KEY, highScore);
+        ActualizarTextoHighScore();
+    }
+
+    gameVelObjetivo = 1 + Math.min(score, velRampaMax) * (2 / velRampaMax);
+
     if(score == 5){
-        gameVel = 1.5;
         contenedor.classList.add("mediodia");
     }else if(score == 10) {
-        gameVel = 2;
         contenedor.classList.add("tarde");
     } else if(score == 20) {
-        gameVel = 3;
         contenedor.classList.add("noche");
     }
-    suelo.style.animationDuration = (3/gameVel)+"s";
 }
 
 function GameOver() {
     Estrellarse();
-    gameOver.style.display = "block";
+    if(textoFinalScore) textoFinalScore.innerText = score;
+    ActualizarTextoHighScore();
+    gameOver.classList.add("visible");
 }
 
 function Reiniciar() {
     parado = false;
     score = 0;
     gameVel = 1;
-    
+    gameVelObjetivo = 1;
+
     contenedor.classList.remove("mediodia", "tarde", "noche");
-    
-    gameOver.style.display = "none";
+
+    gameOver.classList.remove("visible");
     dino.classList.remove("dino-estrellado");
     dino.classList.add("dino-corriendo");
-    
-    textoScore.innerText = score;
-    
+
+    textoScore.innerText = String(score).padStart(2, "0");
+
     // Limpiar obstáculos
     obstaculos.forEach(obstaculo => {
         obstaculo.parentNode.removeChild(obstaculo);
